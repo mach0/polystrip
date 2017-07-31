@@ -62,7 +62,7 @@ class PolyStrip:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&polystrip')
+        self.menu = self.tr(u'&PolyStrip')
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'PolyStrip')
         self.toolbar.setObjectName(u'PolyStrip')
@@ -171,7 +171,7 @@ class PolyStrip:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginVectorMenu(
-                self.tr(u'&polystrip'),
+                self.tr(u'&PolyStrip'),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
@@ -186,5 +186,5 @@ class PolyStrip:
         # See if OK was pressed
         if result:
             layer = self.iface.activeLayer()
-            PolyStripDialog.polystrip(self,layer)
+            self.dlg.polystrip(layer)
 

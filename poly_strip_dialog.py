@@ -44,4 +44,5 @@ class PolyStripDialog(QtGui.QDialog, FORM_CLASS):
     def polystrip(self, layer):
         width = self.widthSpinBox.value()
         height = self.heightSpinBox.value()
-        getAllPages(layer, width, height, 31255, 0.4)
+        coverage = self.coverSpinBox.value() / 100.0
+        getAllPages(layer, width, height, 31255, coverage)
