@@ -1,6 +1,28 @@
 #!python
 # coding: utf-8
+"""
+/***************************************************************************
+ PolyStripDialog
+                                 A QGIS plugin
+ Polygons along lines
+                             -------------------
+        begin                : 2017-07-29
+        git sha              : $Format:%H$
+        copyright            : (C) 2017 by Werner Macho
+        email                : werner.macho@gmail.com
+ ***************************************************************************/
 
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+"""
+
+# following code mostly taken from
 # https://gis.stackexchange.com/questions/173127/generating-equal-sized-polygons-along-line-with-pyqgis
 from qgis.core import QgsMapLayerRegistry, QgsGeometry, QgsField, QgsFeature, QgsPoint, QGis, QgsVectorLayer
 from PyQt4.QtCore import QVariant
@@ -12,7 +34,7 @@ def getAllPages(layer, width, height, srid, overlap):
         if geom.type() != QGis.Line:
             print "Geometry type should be a LineString"
             return 2
-        pages = QgsVectorLayer("Polygon?crs=epsg:"+str(srid),
+        pages = QgsVectorLayer("Polygon?crs="+str(srid),
                                layer.name()+'_id_'+str(feature.id())+'_pages',
                                "memory")
         fid = QgsField("fid", QVariant.Int, "int")
@@ -22,25 +44,22 @@ def getAllPages(layer, width, height, srid, overlap):
         pagesProvider = pages.dataProvider()
         pagesProvider.addAttributes(attributes)
         curs = 0
-        numpages = geom.length()/width
-        step = 1.0/numpages
-        stepnudge = (1.0-overlap) * step
+        numpages = geom.length() / width
+        step = 1.0 / numpages
+        stepnudge = (1.0 - overlap) * step
         pageFeatures = []
         r = 1
-        # currangle = 0
         while curs <= 1:
             startpoint = geom.interpolate(curs*geom.length())
             endpoint = geom.interpolate((curs+step)*geom.length())
             x_start = startpoint.asPoint().x()
             y_start = startpoint.asPoint().y()
-            x_end = endpoint.asPoint().x()
-            y_end = endpoint.asPoint().y()
             currpoly = QgsGeometry().fromWkt(
                 'POLYGON((0 0, 0 {height},{width} {height}, {width} 0, 0 0))'.format(height=height, width=width))
             currpoly.translate(0,-height/2)
             azimuth = startpoint.asPoint().azimuth(endpoint.asPoint())
             currangle = (azimuth+270) % 360
-            currpoly.rotate(currangle, QgsPoint(0,0))
+            currpoly.rotate(currangle, QgsPoint(0, 0))
             currpoly.translate(x_start, y_start)
             currpoly.asPolygon()
             page = currpoly

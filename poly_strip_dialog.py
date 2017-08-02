@@ -26,6 +26,8 @@ import os
 from PyQt4 import QtGui, uic
 from poly_strip_alg import getAllPages
 
+from qgis.gui import QgsGenericProjectionSelector
+
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'poly_strip_dialog_base.ui'))
 
@@ -34,15 +36,25 @@ class PolyStripDialog(QtGui.QDialog, FORM_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         super(PolyStripDialog, self).__init__(parent)
-        # Set up the user interface from Designer.
-        # After setupUI you can access any designer object by doing
-        # self.<objectname>, and you can use auto connect slots - see
-        # http://qt-project.org/doc/qt-4.8/designer-using-a-ui-file.html
-        # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
 
     def polystrip(self, layer):
+        if self.crsBoxSelect.isChecked():
+            srid = PolyStripDialog().crsselectauto(layer)
+        else:
+            srid = PolyStripDialog().crsselect()
         width = self.widthSpinBox.value()
         height = self.heightSpinBox.value()
         coverage = self.coverSpinBox.value() / 100.0
-        getAllPages(layer, width, height, 31255, coverage)
+        getAllPages(layer, width, height, srid, coverage)
+
+    def crsselect(self):
+        projSelector = QgsGenericProjectionSelector()
+        projSelector.exec_()
+        srid = projSelector.selectedAuthId()
+        return srid
+
+    def crsselectauto(self, layer):
+        srid = layer.crs().authid()
+        return srid
+

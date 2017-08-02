@@ -183,8 +183,10 @@ class PolyStrip:
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
+
         # See if OK was pressed
         if result:
             layer = self.iface.activeLayer()
             self.dlg.polystrip(layer)
+
 
