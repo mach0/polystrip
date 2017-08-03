@@ -41,13 +41,13 @@ def getAllPages(layer, width, height, srid, overlap):
         angle = QgsField("angle", QVariant.Double, "double")
         attributes = [fid, angle]
         pages.startEditing()
-        pagesProvider = pages.dataProvider()
-        pagesProvider.addAttributes(attributes)
+        pages_provider = pages.dataProvider()
+        pages_provider.addAttributes(attributes)
         curs = 0
         numpages = geom.length() / width
         step = 1.0 / numpages
         stepnudge = (1.0 - overlap) * step
-        pageFeatures = []
+        page_features = []
         r = 1
         while curs <= 1:
             startpoint = geom.interpolate(curs*geom.length())
@@ -56,7 +56,7 @@ def getAllPages(layer, width, height, srid, overlap):
             y_start = startpoint.asPoint().y()
             currpoly = QgsGeometry().fromWkt(
                 'POLYGON((0 0, 0 {height},{width} {height}, {width} 0, 0 0))'.format(height=height, width=width))
-            currpoly.translate(0,-height/2)
+            currpoly.translate(0, -height/2)
             azimuth = startpoint.asPoint().azimuth(endpoint.asPoint())
             currangle = (azimuth+270) % 360
             currpoly.rotate(currangle, QgsPoint(0, 0))
@@ -67,9 +67,9 @@ def getAllPages(layer, width, height, srid, overlap):
             feat = QgsFeature()
             feat.setAttributes([r, currangle])
             feat.setGeometry(page)
-            pageFeatures.append(feat)
+            page_features.append(feat)
             r = r + 1
-        pagesProvider.addFeatures(pageFeatures)
+        pages_provider.addFeatures(page_features)
         pages.commitChanges()
         QgsMapLayerRegistry.instance().addMapLayer(pages)
     return 0

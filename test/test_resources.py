@@ -31,7 +31,7 @@ class PolyStripDialogTest(unittest.TestCase):
 
     def test_icon_png(self):
         """Test we can click OK."""
-        path = ':/plugins/PolyStrip/icon.png'
+        path = ':/plugins/PolyStrip/img/polystrip.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
 

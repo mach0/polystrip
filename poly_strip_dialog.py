@@ -42,19 +42,20 @@ class PolyStripDialog(QtGui.QDialog, FORM_CLASS):
         if self.crsBoxSelect.isChecked():
             srid = PolyStripDialog().crsselectauto(layer)
         else:
-            srid = PolyStripDialog().crsselect()
+            srid = PolyStripDialog().crsselect
         width = self.widthSpinBox.value()
         height = self.heightSpinBox.value()
         coverage = self.coverSpinBox.value() / 100.0
         getAllPages(layer, width, height, srid, coverage)
 
-    def crsselect(self):
+    @staticmethod
+    def crsselect():
         projSelector = QgsGenericProjectionSelector()
         projSelector.exec_()
         srid = projSelector.selectedAuthId()
         return srid
 
-    def crsselectauto(self, layer):
+    @staticmethod
+    def crsselectauto(layer):
         srid = layer.crs().authid()
         return srid
-

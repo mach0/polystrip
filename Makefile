@@ -48,7 +48,7 @@ PY_FILES = \
 
 UI_FILES = poly_strip_dialog_base.ui
 
-EXTRAS = metadata.txt icon.png
+EXTRAS = metadata.txt img/polystrip.png
 
 EXTRA_DIRS =
 

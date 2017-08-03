@@ -64,6 +64,7 @@ class PolyStrip:
         self.actions = []
         self.menu = self.tr(u'&PolyStrip')
         # TODO: We are going to let the user set this up in a future iteration
+        icondef = self.iface.mainWindow()
         self.toolbar = self.iface.addToolBar(u'PolyStrip')
         self.toolbar.setObjectName(u'PolyStrip')
 
@@ -133,7 +134,7 @@ class PolyStrip:
 
         # Create the dialog (after translation) and keep reference
         self.dlg = PolyStripDialog()
-
+        parent = self.iface.mainWindow()
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -160,7 +161,7 @@ class PolyStrip:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/PolyStrip/icon.png'
+        icon_path = ':/plugins/PolyStrip/img/polystrip.png'
         self.add_action(
             icon_path,
             text=self.tr(u'PolyStrip'),
