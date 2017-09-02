@@ -134,7 +134,6 @@ class PolyStrip:
 
         # Create the dialog (after translation) and keep reference
         self.dlg = PolyStripDialog()
-        parent = self.iface.mainWindow()
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -165,8 +164,7 @@ class PolyStrip:
         self.add_action(
             icon_path,
             text=self.tr(u'PolyStrip'),
-            callback=self.run,
-            parent=self.iface.mainWindow())
+            callback=self.run)
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
