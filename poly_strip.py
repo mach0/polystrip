@@ -20,13 +20,23 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon
-
-# Initialize Qt resources from file resources.py
-import resources
+from qgis.PyQt.QtCore import (
+    QSettings,
+    QTranslator,
+    qVersion,
+    QCoreApplication
+)
+from qgis.PyQt.QtGui import (
+    QIcon
+)
+from qgis.PyQt.QtWidgets import (
+    QAction
+)
 # Import the code for the dialog
-from poly_strip_dialog import PolyStripDialog
+from .poly_strip_dialog import PolyStripDialog
+# Initialize Qt resources from file resources.py
+from . import resources
+
 
 import os.path
 
@@ -64,7 +74,6 @@ class PolyStrip:
         self.actions = []
         self.menu = self.tr(u'&PolyStrip')
         # TODO: We are going to let the user set this up in a future iteration
-        icondef = self.iface.mainWindow()
         self.toolbar = self.iface.addToolBar(u'PolyStrip')
         self.toolbar.setObjectName(u'PolyStrip')
 

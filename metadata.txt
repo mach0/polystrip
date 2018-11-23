@@ -8,9 +8,10 @@
 
 [general]
 name=PolyStrip
-qgisMinimumVersion=2.0
+qgisMinimumVersion=2.99
+qgisMaximumVersion=3.98
 description=Polygons along lines 
-version=0.1
+version=0.2
 author=Werner Macho
 email=werner.macho@gmail.com
 
@@ -24,6 +25,7 @@ repository=https://github.com/mach0/polystrip
 
 # Uncomment the following line and add your changelog:
 changelog=
+    0.2 make it work with QGIS 3.x
     0.1 initial version
 
 # Tags are comma separated with spaces allowed

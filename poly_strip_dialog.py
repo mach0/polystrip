@@ -23,16 +23,24 @@
 
 import os
 
-from PyQt4 import QtGui, uic
-from poly_strip_alg import getAllPages
+from qgis.PyQt import (
+    QtGui,
+    uic
+)
+from qgis.PyQt.QtWidgets import (
+    QDialog
+)
+from qgis.gui import (
+    QgsProjectionSelectionTreeWidget
+)
+from .poly_strip_alg import get_all_pages
 
-from qgis.gui import QgsGenericProjectionSelector
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'poly_strip_dialog_base.ui'))
 
 
-class PolyStripDialog(QtGui.QDialog, FORM_CLASS):
+class PolyStripDialog(QDialog, FORM_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         super(PolyStripDialog, self).__init__(parent)
@@ -46,13 +54,13 @@ class PolyStripDialog(QtGui.QDialog, FORM_CLASS):
         width = self.widthSpinBox.value()
         height = self.heightSpinBox.value()
         coverage = self.coverSpinBox.value() / 100.0
-        getAllPages(layer, width, height, srid, coverage)
+        get_all_pages(layer, width, height, srid, coverage)
 
     @staticmethod
     def crsselect():
-        projSelector = QgsGenericProjectionSelector()
-        projSelector.exec_()
-        srid = projSelector.selectedAuthId()
+        proj_selector = QgsProjectionSelectionTreeWidget()
+        proj_selector.exec_()
+        srid = proj_selector.crs()
         return srid
 
     @staticmethod

@@ -24,15 +24,27 @@
 
 # following code mostly taken from
 # https://gis.stackexchange.com/questions/173127/generating-equal-sized-polygons-along-line-with-pyqgis
-from qgis.core import QgsMapLayerRegistry, QgsGeometry, QgsField, QgsFeature, QgsPoint, QGis, QgsVectorLayer
-from PyQt4.QtCore import QVariant
+
+from qgis.core import (
+    QgsProject,
+    QgsGeometry,
+    QgsField,
+    QgsFeature,
+    QgsPointXY,
+    Qgis,
+    QgsVectorLayer,
+    QgsWkbTypes
+)
+from qgis.PyQt.QtCore import (
+    QVariant
+)
 
 
-def getAllPages(layer, width, height, srid, overlap):
+def get_all_pages(layer, width, height, srid, overlap):
     for feature in layer.selectedFeatures():
         geom = feature.geometry()
-        if geom.type() != QGis.Line:
-            print "Geometry type should be a LineString"
+        if geom.type() != QgsWkbTypes.LineGeometry:
+            print("Geometry type should be a LineString")
             return 2
         pages = QgsVectorLayer("Polygon?crs="+str(srid),
                                layer.name()+'_id_'+str(feature.id())+'_pages',
@@ -59,7 +71,7 @@ def getAllPages(layer, width, height, srid, overlap):
             currpoly.translate(0, -height/2)
             azimuth = startpoint.asPoint().azimuth(endpoint.asPoint())
             currangle = (azimuth+270) % 360
-            currpoly.rotate(currangle, QgsPoint(0, 0))
+            currpoly.rotate(currangle, QgsPointXY(0, 0))
             currpoly.translate(x_start, y_start)
             currpoly.asPolygon()
             page = currpoly
@@ -71,5 +83,5 @@ def getAllPages(layer, width, height, srid, overlap):
             r = r + 1
         pages_provider.addFeatures(page_features)
         pages.commitChanges()
-        QgsMapLayerRegistry.instance().addMapLayer(pages)
+        QgsProject.instance().addMapLayer(pages)
     return 0
