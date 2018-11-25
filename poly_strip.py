@@ -32,6 +32,12 @@ from qgis.PyQt.QtGui import (
 from qgis.PyQt.QtWidgets import (
     QAction
 )
+from qgis.core import (
+    Qgis,
+    QgsApplication,
+    QgsMapLayer,
+    QgsWkbTypes
+)
 # Import the code for the dialog
 from .poly_strip_dialog import PolyStripDialog
 # Initialize Qt resources from file resources.py
@@ -40,6 +46,12 @@ from . import resources
 
 import os.path
 
+
+def show_warning(self, message):
+    text = QCoreApplication.translate('Polystrip', message)
+    mb = self.iface.messageBar()
+    mb.pushWidget(mb.createMessage(text),
+                  Qgis.Warning, 5)
 
 class PolyStrip:
     """QGIS Plugin Implementation."""
@@ -169,7 +181,7 @@ class PolyStrip:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/PolyStrip/img/polystrip.png'
+        icon_path = ':/plugins/PolyStrip/img/polystrip.svg'
         self.add_action(
             icon_path,
             text=self.tr(u'PolyStrip'),
@@ -187,6 +199,17 @@ class PolyStrip:
 
     def run(self):
         """Run method that performs all the real work"""
+        leave = -1
+
+        for layer in self.iface.mapCanvas().layers():
+            if layer.type() == QgsMapLayer.VectorLayer and \
+               layer.geometryType() == QgsWkbTypes.LineGeometry:
+                leave += 1
+
+        if leave < 0:
+            message = "No layers with line features - polystrip needs a line feature!"
+            show_warning(self, message)
+            return
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
