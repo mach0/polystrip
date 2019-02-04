@@ -4,14 +4,15 @@
 # embedding metadata in __init__.py will 
 # is no longer supported since version 2.0.
 
-# This file should be included when you package your plugin.# Mandatory items:
+# This file should be included when you package your plugin.
+# Mandatory items:
 
 [general]
 name=PolyStrip
 qgisMinimumVersion=2.99
 qgisMaximumVersion=3.98
 description=Polygons along lines 
-version=0.2
+version=0.3
 author=Werner Macho
 email=werner.macho@gmail.com
 
@@ -25,6 +26,7 @@ repository=https://github.com/mach0/polystrip
 
 # Uncomment the following line and add your changelog:
 changelog=
+    0.3 fix bug for QGIS 3.4 where interpolate() returns no geometry
     0.2 make it work with QGIS 3.x
     0.1 initial version
 

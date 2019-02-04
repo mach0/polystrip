@@ -63,7 +63,11 @@ def get_all_pages(layer, width, height, srid, overlap):
         r = 1
         while curs <= 1:
             startpoint = geom.interpolate(curs*geom.length())
-            endpoint = geom.interpolate((curs+step)*geom.length())
+            # interpolate returns no geometry when > 1
+            forward = (curs+step)
+            if forward > 1:
+                forward = 1
+            endpoint = geom.interpolate(forward*geom.length())
             x_start = startpoint.asPoint().x()
             y_start = startpoint.asPoint().y()
             currpoly = QgsGeometry().fromWkt(

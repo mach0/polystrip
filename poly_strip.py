@@ -53,6 +53,7 @@ def show_warning(self, message):
     mb.pushWidget(mb.createMessage(text),
                   Qgis.Warning, 5)
 
+
 class PolyStrip:
     """QGIS Plugin Implementation."""
 
@@ -85,7 +86,6 @@ class PolyStrip:
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&PolyStrip')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'PolyStrip')
         self.toolbar.setObjectName(u'PolyStrip')
 
@@ -207,7 +207,7 @@ class PolyStrip:
                 leave += 1
 
         if leave < 0:
-            message = "No layers with line features - polystrip needs a line feature!"
+            message = "No layers with line features - polystrip needs a selected line feature!"
             show_warning(self, message)
             return
         # show the dialog
@@ -219,5 +219,3 @@ class PolyStrip:
         if result:
             layer = self.iface.activeLayer()
             self.dlg.polystrip(layer)
-
-
