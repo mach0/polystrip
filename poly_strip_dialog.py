@@ -24,11 +24,13 @@
 import os
 
 from qgis.PyQt import (
-    QtGui,
     uic
 )
 from qgis.PyQt.QtWidgets import (
     QDialog
+)
+from qgis.core import (
+    QgsUnitTypes
 )
 from qgis.gui import (
     QgsProjectionSelectionTreeWidget
@@ -53,8 +55,12 @@ class PolyStripDialog(QDialog, FORM_CLASS):
             srid = PolyStripDialog().crsselect
         width = self.widthSpinBox.value()
         height = self.heightSpinBox.value()
-        coverage = self.coverSpinBox.value() / 100.0
+        coverage = self.coverSpinBox.value()
         get_all_pages(layer, width, height, srid, coverage)
+
+    def labelwriter(self, unitstr):
+        unit = unitstr
+        self.label_unit.setText(unit)
 
     @staticmethod
     def crsselect():

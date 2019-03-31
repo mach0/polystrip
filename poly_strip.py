@@ -30,13 +30,13 @@ from qgis.PyQt.QtGui import (
     QIcon
 )
 from qgis.PyQt.QtWidgets import (
-    QAction
+    QAction,
 )
 from qgis.core import (
     Qgis,
-    QgsApplication,
     QgsMapLayer,
-    QgsWkbTypes
+    QgsWkbTypes,
+    QgsUnitTypes
 )
 # Import the code for the dialog
 from .poly_strip_dialog import PolyStripDialog
@@ -74,7 +74,7 @@ class PolyStrip:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'PolyStrip_{}.qm'.format(locale))
+            '{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -206,12 +206,35 @@ class PolyStrip:
                layer.geometryType() == QgsWkbTypes.LineGeometry:
                 leave += 1
 
+            if layer == self.iface.activeLayer() and \
+                    layer.type() != QgsMapLayer.VectorLayer:
+                message = self.tr(u'Select a Feature in a Vectorlayer')
+                show_warning(self, message)
+                return
+            if layer == self.iface.activeLayer() and \
+                    layer.geometryType() != QgsWkbTypes.LineGeometry:
+                message = self.tr(u'Select a Feature in a Linelayer')
+                show_warning(self, message)
+                return
+            if layer == self.iface.activeLayer() and \
+                    layer.selectedFeatureCount() == 0:
+                message = self.tr('No feature in active Layer selected!')
+                show_warning(self, message)
+                return
+
         if leave < 0:
-            message = "No layers with line features - polystrip needs a selected line feature!"
+            message = self.tr(u'No layers with line features - polystrip needs a selected line feature!')
             show_warning(self, message)
             return
+
         # show the dialog
+        # First get Units from current Canvas
+        unit = self.iface.mapCanvas().mapUnits()
+        unit_strg = QgsUnitTypes.encodeUnit(unit)
+        self.dlg.labelwriter(unit_strg)
+
         self.dlg.show()
+
         # Run the dialog event loop
         result = self.dlg.exec_()
 

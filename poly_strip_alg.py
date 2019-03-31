@@ -31,7 +31,6 @@ from qgis.core import (
     QgsField,
     QgsFeature,
     QgsPointXY,
-    Qgis,
     QgsVectorLayer,
     QgsWkbTypes
 )
@@ -40,34 +39,38 @@ from qgis.PyQt.QtCore import (
 )
 
 
-def get_all_pages(layer, width, height, srid, overlap):
+def get_all_pages(layer, width, height, srid, coverage):
+
     for feature in layer.selectedFeatures():
         geom = feature.geometry()
         if geom.type() != QgsWkbTypes.LineGeometry:
             print("Geometry type should be a LineString")
             return 2
+        extended_geom = QgsGeometry.extendLine(geom, coverage, 0)
         pages = QgsVectorLayer("Polygon?crs="+str(srid),
-                               layer.name()+'_id_'+str(feature.id())+'_pages',
+                               layer.name()+'_id_'+str(feature.id())+'_strip',
                                "memory")
         fid = QgsField("fid", QVariant.Int, "int")
         angle = QgsField("angle", QVariant.Double, "double")
-        attributes = [fid, angle]
+        atlas = QgsField("atl_ang", QVariant.Double, "double")
+        attributes = [fid, angle, atlas]
         pages.startEditing()
         pages_provider = pages.dataProvider()
         pages_provider.addAttributes(attributes)
         curs = 0
-        numpages = geom.length() / width
+        geomlength = extended_geom.length()
+        numpages = geomlength / width
         step = 1.0 / numpages
-        stepnudge = (1.0 - overlap) * step
+        stepnudge = (1.0 - (coverage/100)) * step
         page_features = []
         r = 1
         while curs <= 1:
-            startpoint = geom.interpolate(curs*geom.length())
+            startpoint = extended_geom.interpolate(curs*geomlength)
             # interpolate returns no geometry when > 1
             forward = (curs+step)
             if forward > 1:
                 forward = 1
-            endpoint = geom.interpolate(forward*geom.length())
+            endpoint = extended_geom.interpolate(forward*geomlength)
             x_start = startpoint.asPoint().x()
             y_start = startpoint.asPoint().y()
             currpoly = QgsGeometry().fromWkt(
@@ -75,13 +78,14 @@ def get_all_pages(layer, width, height, srid, overlap):
             currpoly.translate(0, -height/2)
             azimuth = startpoint.asPoint().azimuth(endpoint.asPoint())
             currangle = (azimuth+270) % 360
+            curratlas = 360-currangle
             currpoly.rotate(currangle, QgsPointXY(0, 0))
             currpoly.translate(x_start, y_start)
             currpoly.asPolygon()
             page = currpoly
             curs = curs + stepnudge
             feat = QgsFeature()
-            feat.setAttributes([r, currangle])
+            feat.setAttributes([r, currangle, curratlas])
             feat.setGeometry(page)
             page_features.append(feat)
             r = r + 1

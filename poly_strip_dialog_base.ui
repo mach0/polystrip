@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>291</width>
-    <height>191</height>
+    <width>259</width>
+    <height>185</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>polystrip</string>
+   <string>PolyStrip</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="2">
+   <item row="1" column="1">
     <widget class="QDoubleSpinBox" name="widthSpinBox">
      <property name="maximum">
       <double>999999999.000000000000000</double>
@@ -24,7 +24,24 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="2">
+   <item row="6" column="0" colspan="2">
+    <widget class="QDialogButtonBox" name="button_box">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Polygon Width:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
     <widget class="QDoubleSpinBox" name="heightSpinBox">
      <property name="maximum">
       <double>999999999.000000000000000</double>
@@ -34,7 +51,21 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Overlapping:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Polygon Height:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
     <widget class="QSpinBox" name="coverSpinBox">
      <property name="suffix">
       <string notr="true"> %</string>
@@ -47,7 +78,14 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="2">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_units">
+     <property name="text">
+      <string>Input Unit in:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
     <widget class="QCheckBox" name="crsBoxSelect">
      <property name="text">
       <string>CRS from Layer</string>
@@ -57,34 +95,10 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="1" colspan="2">
-    <widget class="QDialogButtonBox" name="button_box">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Help|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QLabel" name="label_2">
+   <item row="0" column="1">
+    <widget class="QLabel" name="label_unit">
      <property name="text">
-      <string>Overlapping</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Height</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>Width</string>
+      <string>changeme</string>
      </property>
     </widget>
    </item>
