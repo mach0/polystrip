@@ -12,7 +12,7 @@ name=PolyStrip
 qgisMinimumVersion=2.99
 qgisMaximumVersion=3.98
 description=Polygons along lines 
-version=0.4
+version=3.0
 author=Werner Macho
 email=werner.macho@gmail.com
 
@@ -26,6 +26,7 @@ repository=https://github.com/mach0/polystrip
 
 # Uncomment the following line and add your changelog:
 changelog=
+    3.0 first public stable release for QGIS 3.x and broader testing
     0.4 extended error catching, new atlas attribute, start line after overlap
     0.3 fix bug for QGIS 3.4 where interpolate() returns no geometry
     0.2 make it work with QGIS 3.x
@@ -38,7 +39,7 @@ homepage=https://github.com/mach0/polystrip
 category=Vector
 icon=img/polystrip.svg
 # experimental flag
-experimental=True
+experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
