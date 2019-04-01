@@ -39,14 +39,14 @@ from qgis.PyQt.QtCore import (
 )
 
 
-def get_all_pages(layer, width, height, srid, coverage):
+def get_all_pages(layer, width, height, srid, coverage, covstart):
 
     for feature in layer.selectedFeatures():
         geom = feature.geometry()
         if geom.type() != QgsWkbTypes.LineGeometry:
             print("Geometry type should be a LineString")
             return 2
-        extended_geom = QgsGeometry.extendLine(geom, coverage, 0)
+        extended_geom = QgsGeometry.extendLine(geom, covstart, coverage)
         pages = QgsVectorLayer("Polygon?crs="+str(srid),
                                layer.name()+'_id_'+str(feature.id())+'_strip',
                                "memory")
@@ -58,7 +58,7 @@ def get_all_pages(layer, width, height, srid, coverage):
         pages_provider = pages.dataProvider()
         pages_provider.addAttributes(attributes)
         curs = 0
-        geomlength = extended_geom.length()
+        geomlength = geom.length()
         numpages = geomlength / width
         step = 1.0 / numpages
         stepnudge = (1.0 - (coverage/100)) * step

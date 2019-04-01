@@ -29,9 +29,6 @@ from qgis.PyQt import (
 from qgis.PyQt.QtWidgets import (
     QDialog
 )
-from qgis.core import (
-    QgsUnitTypes
-)
 from qgis.gui import (
     QgsProjectionSelectionTreeWidget
 )
@@ -56,7 +53,8 @@ class PolyStripDialog(QDialog, FORM_CLASS):
         width = self.widthSpinBox.value()
         height = self.heightSpinBox.value()
         coverage = self.coverSpinBox.value()
-        get_all_pages(layer, width, height, srid, coverage)
+        covstart = self.coverSpinBoxStart.value()
+        get_all_pages(layer, width, height, srid, coverage, covstart)
 
     def labelwriter(self, unitstr):
         unit = unitstr
