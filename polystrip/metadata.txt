@@ -1,0 +1,38 @@
+[general]
+name=PolyStrip
+qgisMinimumVersion=3.0
+qgisMaximumVersion=4.99
+description=Polygons along lines 
+version=3.0.1
+author=Werner Macho
+email=werner.macho@gmail.com
+
+about=Creates Polygons along line features which can be used as templates for atlas generation.
+tracker=https://github.com/mach0/polystrip/issues [cite: 5]
+repository=https://github.com/mach0/polystrip [cite: 5]
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+changelog=
+    3.0.1 Improvements for Coverage
+    3.0 first public stable release for QGIS 3.x and broader testing
+    0.4 extended error catching, new atlas attribute, start line after overlap
+    0.3 fix bug for QGIS 3.4 where interpolate() returns no geometry
+    0.2 make it work with QGIS 3.x
+    0.1 initial version
+
+# Tags are comma separated with spaces allowed
+tags=polygon, strip
+
+homepage=https://github.com/mach0/polystrip
+category=Vector
+icon=img/polystrip.svg
+# experimental flag
+experimental=False
+supportsQt6=yes
+
+# deprecated flag (applies to the whole plugin, not just a 
+# single version)
+deprecated=False

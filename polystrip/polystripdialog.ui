@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PolyStripDialog</class>
+ <widget class="QDialog" name="PolyStripDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>420</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PolyStrip - Create Polygons along Lines</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>img/polystrip.png</normaloff>img/polystrip.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox_info">
+     <property name="title">
+      <string>Layer Information</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_info">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_units">
+        <property name="text">
+         <string>Input Unit:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_unit">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font-weight: bold; color: #0066cc;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_polygon">
+     <property name="title">
+      <string>Polygon Parameters</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_polygon">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_width">
+        <property name="text">
+         <string>Polygon Width:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="widthSpinBox">
+        <property name="toolTip">
+         <string>Width of each polygon strip along the line</string>
+        </property>
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>999999999.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_height">
+        <property name="text">
+         <string>Polygon Height:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="heightSpinBox">
+        <property name="toolTip">
+         <string>Height (perpendicular distance) of each polygon from the line</string>
+        </property>
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>999999999.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>50.000000000000000</double>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_coverage">
+     <property name="title">
+      <string>Coverage Settings</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_coverage">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_overlap">
+        <property name="text">
+         <string>Overlap:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="coverSpinBox">
+        <property name="toolTip">
+         <string>Percentage of overlap between adjacent polygons</string>
+        </property>
+        <property name="suffix">
+         <string> %</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_start">
+        <property name="text">
+         <string>Start Offset:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="coverSpinBoxStart">
+        <property name="toolTip">
+         <string>Distance from line start to begin creating polygons</string>
+        </property>
+        <property name="minimum">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>9999999.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>20.000000000000000</double>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_crs">
+     <property name="title">
+      <string>Coordinate Reference System</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_crs">
+      <item row="0" column="0" colspan="2">
+       <widget class="QCheckBox" name="crsBoxSelect">
+        <property name="text">
+         <string>Use CRS from source layer (recommended)</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>Use the same coordinate reference system as the input line layer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="label_crs_info">
+        <property name="text">
+         <string>Uncheck to select a different CRS for the output polygons</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: #666666; font-style: italic;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="button_box">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>button_box</sender>
+   <signal>accepted()</signal>
+   <receiver>PolyStripDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>button_box</sender>
+   <signal>rejected()</signal>
+   <receiver>PolyStripDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
