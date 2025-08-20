@@ -23,6 +23,7 @@
 from qgis.PyQt.QtCore import (
     QSettings,
     QTranslator,
+    QFileInfo,
     qVersion,
     QCoreApplication
 )
@@ -30,28 +31,17 @@ from qgis.PyQt.QtGui import (
     QIcon
 )
 from qgis.PyQt.QtWidgets import (
-    QAction,
+    QAction
 )
 from qgis.core import (
     Qgis,
     QgsMapLayer,
-    QgsWkbTypes,
-    QgsUnitTypes
+    QgsWkbTypes
 )
 # Import the code for the dialog
-from .poly_strip_dialog import PolyStripDialog
-# Initialize Qt resources from file resources.py
-from . import resources
-
+from .polystripdialog import PolyStripDialog
 
 import os.path
-
-
-def show_warning(self, message):
-    text = QCoreApplication.translate('Polystrip', message)
-    mb = self.iface.messageBar()
-    mb.pushWidget(mb.createMessage(text),
-                  Qgis.Warning, 5)
 
 
 class PolyStrip:
@@ -89,6 +79,11 @@ class PolyStrip:
         self.toolbar = self.iface.addToolBar(u'PolyStrip')
         self.toolbar.setObjectName(u'PolyStrip')
 
+    def show_warning(self, message):
+        text = QCoreApplication.translate('Polystrip', message)
+        mb = self.iface.messageBar()
+        mb.pushWidget(mb.createMessage(text), Qgis.Warning, 5)
+    
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -153,8 +148,6 @@ class PolyStrip:
         :rtype: QAction
         """
 
-        # Create the dialog (after translation) and keep reference
-        self.dlg = PolyStripDialog()
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -180,8 +173,7 @@ class PolyStrip:
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
-        icon_path = ':/plugins/PolyStrip/img/polystrip.svg'
+        icon_path = QFileInfo(__file__).absolutePath() + '/img/polystrip.svg'
         self.add_action(
             icon_path,
             text=self.tr(u'PolyStrip'),
@@ -208,35 +200,33 @@ class PolyStrip:
 
             if layer == self.iface.activeLayer() and \
                     layer.type() != QgsMapLayer.VectorLayer:
-                message = self.tr(u'Select a Feature in a Vectorlayer')
-                show_warning(self, message)
-                return
+                    message = self.tr(u'Select a Feature in a Vectorlayer')
+                    self.show_warning(message)
+                    return
             if layer == self.iface.activeLayer() and \
                     layer.geometryType() != QgsWkbTypes.LineGeometry:
-                message = self.tr(u'Select a Feature in a Linelayer')
-                show_warning(self, message)
-                return
+                    message = self.tr(u'Select a Feature in a Linelayer')
+                    self.show_warning(message)
+                    return
             if layer == self.iface.activeLayer() and \
                     layer.selectedFeatureCount() == 0:
-                message = self.tr('No feature in active Layer selected!')
-                show_warning(self, message)
-                return
+                    message = self.tr('No feature in active Layer selected!')
+                    self.show_warning(message)
+                    return
 
         if leave < 0:
-            message = self.tr(u'No layers with line features - polystrip needs a selected line feature!')
-            show_warning(self, message)
-            return
+                message = self.tr(u'No layers with line features - polystrip needs a selected line feature!')
+                self.show_warning(message)
+                return
 
+        # Create the dialog only when needed
+        self.dlg = PolyStripDialog(iface=self.iface)
+        
         # show the dialog
-        # First get Units from current Canvas
-        unit = self.iface.mapCanvas().mapUnits()
-        unit_strg = QgsUnitTypes.encodeUnit(unit)
-        self.dlg.labelwriter(unit_strg)
-
         self.dlg.show()
 
         # Run the dialog event loop
-        result = self.dlg.exec_()
+        result = self.dlg.exec()
 
         # See if OK was pressed
         if result:

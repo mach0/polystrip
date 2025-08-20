@@ -1,6 +1,0 @@
-<RCC>
-    <qresource prefix="/plugins/PolyStrip">
-        <file>img/polystrip.png</file>
-        <file>img/polystrip.svg</file>
-    </qresource>
-</RCC>
