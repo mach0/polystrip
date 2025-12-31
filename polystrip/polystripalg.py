@@ -1,7 +1,5 @@
-#!python
 # coding: utf-8
 """
-/***************************************************************************
  PolyStripDialog
                                  A QGIS plugin
  Polygons along lines
@@ -10,124 +8,119 @@
         git sha              : $Format:%H$
         copyright            : (C) 2017 by Werner Macho
         email                : werner.macho@gmail.com
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
 """
 
-# following code mostly taken from
-# https://gis.stackexchange.com/questions/173127/generating-equal-sized-polygons-along-line-with-pyqgis
-
+from typing import Optional
 from qgis.core import (
     QgsProject,
     QgsGeometry,
     QgsField,
-    QgsFeature,
-    QgsPointXY,
     QgsVectorLayer,
-    QgsWkbTypes
+    QgsSymbol,
+    QgsSingleSymbolRenderer,
+    QgsWkbTypes,
+    QgsCoordinateReferenceSystem,
+    QgsMessageLog,
+    Qgis
 )
-from qgis.PyQt.QtCore import (
-    QVariant
-)
+from qgis.PyQt.QtCore import Qt, QVariant
+from . import polystrip_line_following
+from . import polystrip_north_up
 
 
-def get_all_pages(layer, width, height, srid, coverage, covstart):
-    """Generate polygon strips along selected line features."""
+def get_all_pages(
+    layer: QgsVectorLayer,
+    width: float,
+    height: float,
+    srid: QgsCoordinateReferenceSystem,
+    coverage: float,
+    covstart: float,
+    follow_line_direction: bool = True
+) -> int:
+    """
+    Generate polygon pages along selected line features
     
-    print(f"=== Algorithm Debug ===")
-    print(f"Received parameters - Width: {width}, Height: {height}, CRS: {srid}")
+    Args:
+        layer: Vector layer containing line features
+        width: Polygon width
+        height: Polygon height
+        srid: Spatial reference system
+        coverage: Coverage percentage for overlap
+        covstart: Start offset distance
+        follow_line_direction: If True, polygons follow line direction; if False, north-up orientation
     
+    Returns:
+        0 on success, error code on failure
+    """
     selected_features = layer.selectedFeatures()
-    print(f"Selected features count: {len(selected_features)}")
     
     if not selected_features:
-        print("ERROR: No features selected!")
+        QgsMessageLog.logMessage("No features selected", "PolyStrip", Qgis.Warning)
         return 1
     
-    for i, feature in enumerate(selected_features):
-        print(f"Processing feature {i+1}/{len(selected_features)}, ID: {feature.id()}")
+    for feature in selected_features:
         geom = feature.geometry()
-        print(f"Geometry type: {geom.type()}, WKB type: {geom.wkbType()}")
         
         if geom.type() != QgsWkbTypes.LineGeometry:
-            print("ERROR: Geometry type should be a LineString")
+            QgsMessageLog.logMessage(
+                f"Feature {feature.id()} is not a LineString", 
+                "PolyStrip", 
+                Qgis.Warning
+            )
             return 2
-            
-        print(f"Geometry length: {geom.length()}")
         
-        extended_geom = QgsGeometry.extendLine(geom, covstart, coverage)
-        layer_name = layer.name()+'_id_'+str(feature.id())+'_strip'
-        print(f"Creating layer: {layer_name}")
+        # Extend line by covstart at both ends
+        extended_geom = QgsGeometry.extendLine(geom, covstart, covstart)
+        layer_name = f"{layer.name()}_id_{feature.id()}_strip"
         
         # Create the layer with proper CRS
         pages = QgsVectorLayer("Polygon", layer_name, "memory")
-        pages.setCrs(srid)  # Set CRS separately
-        print(f"Layer created, CRS set to: {pages.crs().authid()}")
+        pages.setCrs(srid)
         
-        fid = QgsField("fid", QVariant.Int, "int")
-        angle = QgsField("angle", QVariant.Double, "double")
-        atlas = QgsField("atl_ang", QVariant.Double, "double")
-        attributes = [fid, angle, atlas]
+        # Create attributes
+        attributes = [
+            QgsField("page", QVariant.Int, len=10),
+            QgsField("angle", QVariant.Double, len=10, prec=2),
+            QgsField("atlas", QVariant.Double, len=10, prec=2)
+        ]
+        
         pages.startEditing()
         pages_provider = pages.dataProvider()
         pages_provider.addAttributes(attributes)
         pages.updateFields()
         
-        curs = 0
+        # Common parameters
         geomlength = geom.length()
-        numpages = geomlength / width
-        step = 1.0 / numpages
-        stepnudge = (1.0 - (coverage/100)) * step
+        extended_geomlength = extended_geom.length()
         page_features = []
-        r = 1
         
-        print(f"Loop parameters - Length: {geomlength}, Pages: {numpages}, Step: {step}")
+        # Choose algorithm based on orientation mode
+        if follow_line_direction:
+            polystrip_line_following.create_line_following_polygons(
+                extended_geom, geom, geomlength, extended_geomlength, 
+                width, height, coverage, covstart, page_features, 1)
+        else:
+            polystrip_north_up.create_north_up_polygons(
+                extended_geom, geom, geomlength, extended_geomlength, 
+                width, height, coverage, covstart, page_features, 1)
         
-        while curs <= 1:
-            startpoint = extended_geom.interpolate(curs*geomlength)
-            # interpolate returns no geometry when > 1
-            forward = (curs+step)
-            if forward > 1:
-                forward = 1
-            endpoint = extended_geom.interpolate(forward*geomlength)
-            
-            if not startpoint or not endpoint:
-                print(f"WARNING: No start/end point at cursor {curs}")
-                break
-                
-            x_start = startpoint.asPoint().x()
-            y_start = startpoint.asPoint().y()
-            currpoly = QgsGeometry().fromWkt(
-                'POLYGON((0 0, 0 {height},{width} {height}, {width} 0, 0 0))'.format(height=height, width=width))
-            currpoly.translate(0, -height/2)
-            azimuth = startpoint.asPoint().azimuth(endpoint.asPoint())
-            currangle = (azimuth+270) % 360
-            curratlas = 360-currangle
-            currpoly.rotate(currangle, QgsPointXY(0, 0))
-            currpoly.translate(x_start, y_start)
-            currpoly.asPolygon()
-            page = currpoly
-            curs = curs + stepnudge
-            feat = QgsFeature()
-            feat.setAttributes([r, currangle, curratlas])
-            feat.setGeometry(page)
-            page_features.append(feat)
-            r = r + 1
-            
-        print(f"Created {len(page_features)} polygon features")
+        
         pages_provider.addFeatures(page_features)
         pages.commitChanges()
         
+        # Set polygon style to outline only (no fill)
+        symbol = QgsSymbol.defaultSymbol(pages.geometryType())
+        symbol.symbolLayer(0).setBrushStyle(Qt.BrushStyle.NoBrush)
+        renderer = QgsSingleSymbolRenderer(symbol)
+        pages.setRenderer(renderer)
+        
         # Add to project
         QgsProject.instance().addMapLayer(pages)
-        print(f"Layer added to project: {pages.name()}")
         
+        QgsMessageLog.logMessage(
+            f"Created {len(page_features)} polygons for feature {feature.id()}", 
+            "PolyStrip", 
+            Qgis.Info
+        )
+    
     return 0

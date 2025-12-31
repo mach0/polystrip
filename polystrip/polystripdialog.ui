@@ -27,7 +27,7 @@
       <item row="0" column="0">
        <widget class="QLabel" name="label_units">
         <property name="text">
-         <string>Input Unit:</string>
+         <string>Layer Unit:</string>
         </property>
        </widget>
       </item>
@@ -76,6 +76,13 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="widthUnitComboBox">
+        <property name="toolTip">
+         <string>Unit for width value</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_height">
         <property name="text">
@@ -99,6 +106,13 @@
         </property>
         <property name="decimals">
          <number>3</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QComboBox" name="heightUnitComboBox">
+        <property name="toolTip">
+         <string>Unit for height value</string>
         </property>
        </widget>
       </item>
@@ -157,6 +171,35 @@
         </property>
         <property name="decimals">
          <number>3</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QComboBox" name="offsetUnitComboBox">
+        <property name="toolTip">
+         <string>Unit for start offset value</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_orientation">
+     <property name="title">
+      <string>Polygon Orientation</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_orientation">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="followLineCheckBox">
+        <property name="text">
+         <string>Follow line direction</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+        <property name="toolTip">
+         <string>If checked, polygons will be rotated to follow the line direction. If unchecked, polygons will maintain north-up orientation.</string>
         </property>
        </widget>
       </item>

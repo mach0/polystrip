@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 """
-/***************************************************************************
  PolyStrip
                                  A QGIS plugin
  Polygons along lines 
@@ -9,17 +8,8 @@
         git sha              : $Format:%H$
         copyright            : (C) 2017 by Werner Macho
         email                : werner.macho@gmail.com
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
 """
+from typing import Optional, List
 from qgis.PyQt.QtCore import (
     QSettings,
     QTranslator,
@@ -31,13 +21,15 @@ from qgis.PyQt.QtGui import (
     QIcon
 )
 from qgis.PyQt.QtWidgets import (
-    QAction
+    QAction,
+    QWidget
 )
 from qgis.core import (
     Qgis,
     QgsMapLayer,
     QgsWkbTypes
 )
+from qgis.gui import QgisInterface
 # Import the code for the dialog
 from .polystripdialog import PolyStripDialog
 
@@ -47,7 +39,7 @@ import os.path
 class PolyStrip:
     """QGIS Plugin Implementation."""
 
-    def __init__(self, iface):
+    def __init__(self, iface: QgisInterface):
         """Constructor.
 
         :param iface: An interface instance that will be passed to this class
@@ -79,13 +71,13 @@ class PolyStrip:
         self.toolbar = self.iface.addToolBar(u'PolyStrip')
         self.toolbar.setObjectName(u'PolyStrip')
 
-    def show_warning(self, message):
+    def show_warning(self, message: str) -> None:
         text = QCoreApplication.translate('Polystrip', message)
         mb = self.iface.messageBar()
         mb.pushWidget(mb.createMessage(text), Qgis.Warning, 5)
     
     # noinspection PyMethodMayBeStatic
-    def tr(self, message):
+    def tr(self, message: str) -> str:
         """Get the translation for a string using Qt translation API.
         We implement this ourselves since we do not inherit QObject.
 
@@ -100,15 +92,15 @@ class PolyStrip:
 
     def add_action(
             self,
-            icon_path,
-            text,
+            icon_path: str,
+            text: str,
             callback,
-            enabled_flag=True,
-            add_to_menu=True,
-            add_to_toolbar=True,
-            status_tip=None,
-            whats_this=None,
-            parent=None):
+            enabled_flag: bool = True,
+            add_to_menu: bool = True,
+            add_to_toolbar: bool = True,
+            status_tip: Optional[str] = None,
+            whats_this: Optional[str] = None,
+            parent: Optional[QWidget] = None) -> QAction:
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -171,7 +163,7 @@ class PolyStrip:
 
         return action
 
-    def initGui(self):
+    def initGui(self) -> None:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
         icon_path = QFileInfo(__file__).absolutePath() + '/img/polystrip.svg'
         self.add_action(
@@ -179,7 +171,7 @@ class PolyStrip:
             text=self.tr(u'PolyStrip'),
             callback=self.run)
 
-    def unload(self):
+    def unload(self) -> None:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginVectorMenu(
@@ -189,35 +181,37 @@ class PolyStrip:
         # remove the toolbar
         del self.toolbar
 
-    def run(self):
+    def run(self) -> None:
         """Run method that performs all the real work"""
-        leave = -1
-
-        for layer in self.iface.mapCanvas().layers():
-            if layer.type() == QgsMapLayer.VectorLayer and \
-               layer.geometryType() == QgsWkbTypes.LineGeometry:
-                leave += 1
-
-            if layer == self.iface.activeLayer() and \
-                    layer.type() != QgsMapLayer.VectorLayer:
-                    message = self.tr(u'Select a Feature in a Vectorlayer')
-                    self.show_warning(message)
-                    return
-            if layer == self.iface.activeLayer() and \
-                    layer.geometryType() != QgsWkbTypes.LineGeometry:
-                    message = self.tr(u'Select a Feature in a Linelayer')
-                    self.show_warning(message)
-                    return
-            if layer == self.iface.activeLayer() and \
-                    layer.selectedFeatureCount() == 0:
-                    message = self.tr('No feature in active Layer selected!')
-                    self.show_warning(message)
-                    return
-
-        if leave < 0:
-                message = self.tr(u'No layers with line features - polystrip needs a selected line feature!')
-                self.show_warning(message)
-                return
+        # Check if there are any line layers
+        has_line_layers = any(
+            layer.type() == QgsMapLayer.VectorLayer and 
+            layer.geometryType() == QgsWkbTypes.LineGeometry
+            for layer in self.iface.mapCanvas().layers()
+        )
+        
+        if not has_line_layers:
+            message = self.tr(u'No layers with line features - polystrip needs a selected line feature!')
+            self.show_warning(message)
+            return
+        
+        # Validate active layer
+        active_layer = self.iface.activeLayer()
+        
+        if not active_layer or active_layer.type() != QgsMapLayer.VectorLayer:
+            message = self.tr(u'Select a Feature in a Vectorlayer')
+            self.show_warning(message)
+            return
+            
+        if active_layer.geometryType() != QgsWkbTypes.LineGeometry:
+            message = self.tr(u'Select a Feature in a Linelayer')
+            self.show_warning(message)
+            return
+            
+        if active_layer.selectedFeatureCount() == 0:
+            message = self.tr('No feature in active Layer selected!')
+            self.show_warning(message)
+            return
 
         # Create the dialog only when needed
         self.dlg = PolyStripDialog(iface=self.iface)
