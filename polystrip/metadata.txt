@@ -8,8 +8,8 @@ author=Werner Macho
 email=werner.macho@gmail.com
 
 about=Creates Polygons along line features which can be used as templates for atlas generation.
-tracker=https://github.com/mach0/polystrip/issues [cite: 5]
-repository=https://github.com/mach0/polystrip [cite: 5]
+tracker=https://github.com/mach0/polystrip/issues
+repository=https://github.com/mach0/polystrip
 # End of mandatory metadata
 
 # Recommended items:
