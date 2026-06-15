@@ -56,7 +56,7 @@ class PolyStrip:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            '{}.qm'.format(locale))
+            'polystrip_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
