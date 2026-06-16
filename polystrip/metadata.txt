@@ -4,7 +4,7 @@ qgisMinimumVersion=3.0
 qgisMaximumVersion=4.99
 description=Polygons along lines 
 description[pl]=Poligony wzdłuż linii
-version=3.1.0
+version=3.1.1
 author=Werner Macho
 email=werner.macho@gmail.com
 
@@ -18,6 +18,7 @@ repository=https://github.com/mach0/polystrip
 
 # Uncomment the following line and add your changelog:
 changelog=
+    3.1.1 Added Polish translation thx to marylaGIS
     3.1.0 Feature: Add unit selection for inputs, Optimization: Clean end of line handling
     3.0.1 Improvements for Coverage
     3.0 first public stable release for QGIS 3.x and broader testing
@@ -27,7 +28,7 @@ changelog=
     0.1 initial version
 
 # Tags are comma separated with spaces allowed
-tags=polygon, strip
+tags=polygon, strip, atlas
 
 homepage=https://github.com/mach0/polystrip
 category=Vector
