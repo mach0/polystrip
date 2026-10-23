@@ -20,7 +20,7 @@ repository=https://github.com/mach0/polystrip
 
 # Uncomment the following line and add your changelog:
 changelog=
-    3.2.0 Feature: Processing Toolbox algorithm (supports Graphical Modeler and Python processing.run), MultiLineString support, bounding-box performance optimization, robust backward azimuth heading, complete German and Polish translations, and standardized Makefile.
+    3.2.0 Feature: Print format presets (ISO A0-A5 Landscape & Portrait) with scale and page margin synchronization, Processing Toolbox algorithm (supports Graphical Modeler and Python processing.run), MultiLineString support, bounding-box performance optimization, robust backward azimuth heading, complete German and Polish translations, and standardized Makefile.
     3.1.2 Bug fixes (prevent infinite loop on high overlap, robust azimuth and end detection), Qt6 & PyQt5 cross-compatibility, dynamic CRS selection support
     3.1.1 Added Polish translation thx to marylaGIS
     3.1.0 Feature: Add unit selection for inputs, Optimization: Clean end of line handling

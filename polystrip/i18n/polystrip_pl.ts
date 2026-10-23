@@ -49,17 +49,17 @@
   <context>
     <name>PolyStripAlgorithm</name>
     <message>
-      <location filename="../polystrip_algorithm.py" line="56" />
+      <location filename="../polystrip_algorithm.py" line="70" />
       <source>Polygons Along Lines (PolyStrip)</source>
       <translation>Poligony wzdłuż linii (PolyStrip)</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="59" />
+      <location filename="../polystrip_algorithm.py" line="73" />
       <source>Vector geometry</source>
       <translation>Geometria wektorowa</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="69" />
+      <location filename="../polystrip_algorithm.py" line="83" />
       <source>Creates consecutive, overlapping rectangular polygon strip sheets along linear vector features. Ideal for preparing coverage layers for QGIS Print Layout Atlas map books.
 
 Features include line-following rotation, north-up orientation, start offset, and pre-calculated atlas rotation angles.</source>
@@ -68,57 +68,80 @@ Features include line-following rotation, north-up orientation, start offset, an
 Funkcje obejmują obrót wzdłuż linii, orientację północną, przesunięcie początkowe oraz wstępnie obliczone kąty obrotu dla atlasu.</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="81" />
+      <location filename="../polystrip_algorithm.py" line="95" />
       <source>Input line layer</source>
       <translation>Wejściowa warstwa liniowa</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="88" />
-      <source>Polygon width</source>
-      <translation>Szerokość poligonu</translation>
+      <location filename="../polystrip_algorithm.py" line="102" />
+      <source>Print format preset</source>
+      <translation>Szablon formatu wydruku</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="97" />
-      <source>Polygon height</source>
-      <translation>Wysokość poligonu</translation>
+      <location filename="../polystrip_algorithm.py" line="110" />
+      <source>Map scale denominator (e.g. 8000 for 1:8000)</source>
+      <translation>Mianownik skali mapy (np. 8000 dla 1:8000)</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="106" />
+      <location filename="../polystrip_algorithm.py" line="119" />
+      <source>Page margin in mm (subtracted from paper preset edges)</source>
+      <translation>Margines strony w mm (odejmowany od krawędzi papieru)</translation>
+    </message>
+    <message>
+      <location filename="../polystrip_algorithm.py" line="129" />
+      <source>Custom polygon width (used when preset is Custom)</source>
+      <translation>Własna szerokość poligonu (używana, gdy szablon to Własny)</translation>
+    </message>
+    <message>
+      <location filename="../polystrip_algorithm.py" line="138" />
+      <source>Custom polygon height (used when preset is Custom)</source>
+      <translation>Własna wysokość poligonu (używana, gdy szablon to Własny)</translation>
+    </message>
+    <message>
+      <location filename="../polystrip_algorithm.py" line="147" />
       <source>Overlap coverage (%)</source>
       <translation>Pokrycie nakładania (%)</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="116" />
+      <location filename="../polystrip_algorithm.py" line="157" />
       <source>Start/end line offset distance</source>
       <translation>Odległość przesunięcia początku/końca linii</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="125" />
+      <location filename="../polystrip_algorithm.py" line="166" />
       <source>Follow line direction (uncheck for North-Up)</source>
       <translation>Podążaj za kierunkiem linii (odznacz dla orientacji północnej)</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="132" />
+      <location filename="../polystrip_algorithm.py" line="173" />
       <source>Strip polygons</source>
       <translation>Pasy poligonowe</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="139" />
+      <location filename="../polystrip_algorithm.py" line="180" />
       <source>Number of created polygons</source>
       <translation>Liczba utworzonych poligonów</translation>
     </message>
     <message>
-      <location filename="../polystrip_algorithm.py" line="225" />
+      <location filename="../polystrip_algorithm.py" line="283" />
       <source>Successfully created {0} strip polygons.</source>
       <translation>Pomyślnie utworzono {0} poligonów.</translation>
+    </message>
+    <message>
+      <source>Polygon width</source>
+      <translation type="vanished">Szerokość poligonu</translation>
+    </message>
+    <message>
+      <source>Polygon height</source>
+      <translation type="vanished">Wysokość poligonu</translation>
     </message>
   </context>
   <context>
     <name>PolyStripDialog</name>
     <message>
-      <location filename="../polystripdialog.py" line="162" />
-      <location filename="../polystripdialog.py" line="96" />
-      <location filename="../polystripdialog.py" line="87" />
+      <location filename="../polystripdialog.py" line="221" />
+      <location filename="../polystripdialog.py" line="117" />
+      <location filename="../polystripdialog.py" line="108" />
       <source>Output CRS: {0}</source>
       <translation>Układ wyjściowy: {0}</translation>
     </message>
@@ -141,6 +164,46 @@ Funkcje obejmują obrót wzdłuż linii, orientację północną, przesunięcie 
       <location filename="../polystripdialog.ui" line="0" />
       <source>Polygon Parameters</source>
       <translation>Parametry poligonu</translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source>Print Format Preset:</source>
+      <translation>Szablon formatu wydruku:</translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source>Select an ISO paper format preset (calculates dimensions from scale) or Custom</source>
+      <translation>Wybierz szablon formatu papieru ISO (oblicza wymiary ze skali) lub Własny</translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source>Map Scale (1 : X):</source>
+      <translation>Skala mapy (1 : X):</translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source>Scale denominator for the paper format (e.g. 8000 for 1:8000)</source>
+      <translation>Mianownik skali dla formatu papieru (np. 8000 dla 1:8000)</translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source>1 : </source>
+      <translation>1 : </translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source>Page Margin:</source>
+      <translation>Margines strony:</translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source>Margin in mm inside paper edges for borders, headers, and printer margins (subtracted from each side)</source>
+      <translation>Margines w mm od krawędzi papieru na ramki, nagłówki i marginesy drukarki (odejmowany z każdej strony)</translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source> mm</source>
+      <translation> mm</translation>
     </message>
     <message>
       <location filename="../polystripdialog.ui" line="0" />
@@ -171,6 +234,11 @@ Funkcje obejmują obrót wzdłuż linii, orientację północną, przesunięcie 
       <location filename="../polystripdialog.ui" line="0" />
       <source>Unit for height value</source>
       <translation>Jednostka wysokości</translation>
+    </message>
+    <message>
+      <location filename="../polystripdialog.ui" line="0" />
+      <source>Tip: In QGIS Print Layout Atlas, set Map item &gt; Controlled by Atlas to 'Fixed scale'.</source>
+      <translation>Wskazówka: W atlasie wydruku QGIS ustaw element mapy &gt; Kontrolowane przez atlas na 'Stała skala'.</translation>
     </message>
     <message>
       <location filename="../polystripdialog.ui" line="0" />

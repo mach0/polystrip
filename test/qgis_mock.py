@@ -104,6 +104,9 @@ class MockGeometry:
     def intersects(self, other):
         return True
 
+    def transform(self, ct):
+        pass
+
 
 class MockFeature:
     def __init__(self, fid=1):
@@ -113,6 +116,9 @@ class MockFeature:
 
     def id(self):
         return self._fid
+
+    def setId(self, fid):
+        self._fid = fid
 
     def setGeometry(self, geom):
         self._geom = geom
@@ -135,6 +141,10 @@ class MockProcessingProvider:
     pass
 
 
+class MockCsException(Exception):
+    pass
+
+
 def install_mock_qgis():
     """Install mock modules if qgis is not present."""
     if 'qgis' in sys.modules:
@@ -142,6 +152,7 @@ def install_mock_qgis():
 
     qgis = MagicMock()
     qgis_core = MagicMock()
+    qgis_core.QgsCsException = MockCsException
     qgis_core.QgsGeometry = MockGeometry
     qgis_core.QgsFeature = MockFeature
     qgis_core.QgsPointXY = MockPointXY
@@ -150,6 +161,9 @@ def install_mock_qgis():
     qgis_core.QgsProcessingProvider = MockProcessingProvider
     qgis_core.QgsWkbTypes.LineGeometry = 1
     qgis_core.QgsWkbTypes.Polygon = 2
+    mock_sym = MagicMock()
+    mock_sym.symbolLayerCount.return_value = 1
+    qgis_core.QgsSymbol.defaultSymbol.return_value = mock_sym
     qgis.core = qgis_core
     sys.modules['qgis'] = qgis
     sys.modules['qgis.core'] = qgis_core

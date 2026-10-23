@@ -73,7 +73,29 @@ TRANSLATION_DICTIONARY = {
         'Use the same coordinate reference system as the input line layer':
             'Dasselbe Koordinatenbezugssystem wie die Eingangs-Linienebene verwenden',
         'Uncheck to select a different CRS for the output polygons':
-            'Deaktivieren, um ein anderes KRS für die Ausgabe-Polygone auszuwählen'
+            'Deaktivieren, um ein anderes KRS für die Ausgabe-Polygone auszuwählen',
+        # Print format & scale
+        'Print Format Preset:': 'Druckformat-Vorlage:',
+        'Select an ISO paper format preset (calculates dimensions from scale) or Custom':
+            'Wählen Sie eine ISO-Papierformat-Vorlage (berechnet Dimensionen aus Maßstab) oder Benutzerdefiniert',
+        'Map Scale (1 : X):': 'Kartenmaßstab (1 : X):',
+        'Scale denominator for the paper format (e.g. 8000 for 1:8000)':
+            'Maßstabszahl für das Papierformat (z. B. 8000 für 1:8000)',
+        '1 : ': '1 : ',
+        'Page Margin:': 'Seitenrand:',
+        'Margin in mm inside paper edges for borders, headers, and printer margins (subtracted from each side)':
+            'Rand in mm innerhalb der Papierkanten für Rahmen, Schriftfelder und Druckränder (wird von jeder Seite abgezogen)',
+        ' mm': ' mm',
+        "Tip: In QGIS Print Layout Atlas, set Map item > Controlled by Atlas to 'Fixed scale'.":
+            "Tipp: Im QGIS Drucklayout-Atlas das Kartenelement > Vom Atlas gesteuert auf 'Fester Maßstab' setzen.",
+        'Page margin in mm (subtracted from paper preset edges)':
+            'Seitenrand in mm (von Papierkanten abgezogen)',
+        'Print format preset': 'Druckformat-Vorlage',
+        'Map scale denominator (e.g. 8000 for 1:8000)': 'Kartenmaßstabszahl (z. B. 8000 für 1:8000)',
+        'Custom polygon width (used when preset is Custom)':
+            'Benutzerdefinierte Polygon-Breite (verwendet wenn Vorlage Benutzerdefiniert ist)',
+        'Custom polygon height (used when preset is Custom)':
+            'Benutzerdefinierte Polygon-Höhe (verwendet wenn Vorlage Benutzerdefiniert ist)'
     },
     'pl': {
         # PolyStripAlgorithm
@@ -132,7 +154,29 @@ TRANSLATION_DICTIONARY = {
         'Use the same coordinate reference system as the input line layer':
             'Użyj tego samego układu współrzędnych co warstwa wejściowa',
         'Uncheck to select a different CRS for the output polygons':
-            'Odznacz, aby wybrać inny układ współrzędnych dla poligonów wynikowych'
+            'Odznacz, aby wybrać inny układ współrzędnych dla poligonów wynikowych',
+        # Print format & scale
+        'Print Format Preset:': 'Szablon formatu wydruku:',
+        'Select an ISO paper format preset (calculates dimensions from scale) or Custom':
+            'Wybierz szablon formatu papieru ISO (oblicza wymiary ze skali) lub Własny',
+        'Map Scale (1 : X):': 'Skala mapy (1 : X):',
+        'Scale denominator for the paper format (e.g. 8000 for 1:8000)':
+            'Mianownik skali dla formatu papieru (np. 8000 dla 1:8000)',
+        '1 : ': '1 : ',
+        'Page Margin:': 'Margines strony:',
+        'Margin in mm inside paper edges for borders, headers, and printer margins (subtracted from each side)':
+            'Margines w mm od krawędzi papieru na ramki, nagłówki i marginesy drukarki (odejmowany z każdej strony)',
+        ' mm': ' mm',
+        "Tip: In QGIS Print Layout Atlas, set Map item > Controlled by Atlas to 'Fixed scale'.":
+            "Wskazówka: W atlasie wydruku QGIS ustaw element mapy > Kontrolowane przez atlas na 'Stała skala'.",
+        'Page margin in mm (subtracted from paper preset edges)':
+            'Margines strony w mm (odejmowany od krawędzi papieru)',
+        'Print format preset': 'Szablon formatu wydruku',
+        'Map scale denominator (e.g. 8000 for 1:8000)': 'Mianownik skali mapy (np. 8000 dla 1:8000)',
+        'Custom polygon width (used when preset is Custom)':
+            'Własna szerokość poligonu (używana, gdy szablon to Własny)',
+        'Custom polygon height (used when preset is Custom)':
+            'Własna wysokość poligonu (używana, gdy szablon to Własny)'
     }
 }
 

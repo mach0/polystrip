@@ -25,16 +25,28 @@ from qgis.core import (
     QgsFeature,
     QgsFeatureSink,
     QgsGeometry,
-    QgsWkbTypes
+    QgsWkbTypes,
+    QgsUnitTypes,
+    QgsProcessingParameterEnum
 )
 
 from . import polystrip_line_following
 from . import polystrip_north_up
-from .polystripalg import extract_linestrings, type_int, type_double
+from .polystripalg import (
+    extract_linestrings,
+    type_int,
+    type_double,
+    type_string,
+    PAPER_FORMATS,
+    calculate_ground_dimensions
+)
 
 
 class PolyStripAlgorithm(QgsProcessingAlgorithm):
     INPUT = 'INPUT'
+    PRESET_FORMAT = 'PRESET_FORMAT'
+    SCALE = 'SCALE'
+    MARGIN = 'MARGIN'
     WIDTH = 'WIDTH'
     HEIGHT = 'HEIGHT'
     COVERAGE = 'COVERAGE'
@@ -42,6 +54,8 @@ class PolyStripAlgorithm(QgsProcessingAlgorithm):
     FOLLOW_LINE = 'FOLLOW_LINE'
     OUTPUT = 'OUTPUT'
     OUTPUT_COUNT = 'OUTPUT_COUNT'
+
+    PRESET_OPTIONS = list(PAPER_FORMATS.keys())
 
     def tr(self, string: str) -> str:
         return QCoreApplication.translate('PolyStripAlgorithm', string)
@@ -83,9 +97,36 @@ class PolyStripAlgorithm(QgsProcessingAlgorithm):
             )
         )
         self.addParameter(
+            QgsProcessingParameterEnum(
+                self.PRESET_FORMAT,
+                self.tr('Print format preset'),
+                options=self.PRESET_OPTIONS,
+                defaultValue=0
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.SCALE,
+                self.tr('Map scale denominator (e.g. 8000 for 1:8000)'),
+                type=QgsProcessingParameterNumber.Integer,
+                defaultValue=8000,
+                minValue=1
+            )
+        )
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                self.MARGIN,
+                self.tr('Page margin in mm (subtracted from paper preset edges)'),
+                type=QgsProcessingParameterNumber.Double,
+                defaultValue=0.0,
+                minValue=0.0,
+                maxValue=100.0
+            )
+        )
+        self.addParameter(
             QgsProcessingParameterDistance(
                 self.WIDTH,
-                self.tr('Polygon width'),
+                self.tr('Custom polygon width (used when preset is Custom)'),
                 defaultValue=100.0,
                 parentParameterName=self.INPUT,
                 minValue=0.0001
@@ -94,7 +135,7 @@ class PolyStripAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterDistance(
                 self.HEIGHT,
-                self.tr('Polygon height'),
+                self.tr('Custom polygon height (used when preset is Custom)'),
                 defaultValue=100.0,
                 parentParameterName=self.INPUT,
                 minValue=0.0001
@@ -145,8 +186,22 @@ class PolyStripAlgorithm(QgsProcessingAlgorithm):
         if source is None:
             raise QgsProcessingException(self.invalidSourceError(parameters, self.INPUT))
 
-        width = self.parameterAsDouble(parameters, self.WIDTH, context)
-        height = self.parameterAsDouble(parameters, self.HEIGHT, context)
+        preset_idx = self.parameterAsEnum(parameters, self.PRESET_FORMAT, context)
+        preset_name = self.PRESET_OPTIONS[preset_idx]
+        scale = self.parameterAsInt(parameters, self.SCALE, context)
+        margin = self.parameterAsDouble(parameters, self.MARGIN, context)
+
+        if preset_name != 'Custom' and PAPER_FORMATS.get(preset_name):
+            dims = PAPER_FORMATS[preset_name]
+            ground_w_m, ground_h_m = calculate_ground_dimensions(dims[0], dims[1], scale, margin_mm=margin)
+            layer_unit = source.sourceCrs().mapUnits() if (source.sourceCrs() and source.sourceCrs().isValid()) else QgsUnitTypes.DistanceMeters
+            factor = QgsUnitTypes.fromUnitToUnitFactor(QgsUnitTypes.DistanceMeters, layer_unit)
+            width = ground_w_m * factor
+            height = ground_h_m * factor
+        else:
+            width = self.parameterAsDouble(parameters, self.WIDTH, context)
+            height = self.parameterAsDouble(parameters, self.HEIGHT, context)
+
         coverage = min(max(0.0, self.parameterAsDouble(parameters, self.COVERAGE, context)), 95.0)
         covstart = max(0.0, self.parameterAsDouble(parameters, self.START_OFFSET, context))
         follow_line = self.parameterAsBoolean(parameters, self.FOLLOW_LINE, context)
@@ -155,6 +210,9 @@ class PolyStripAlgorithm(QgsProcessingAlgorithm):
         fields.append(QgsField("page", type_int, len=10))
         fields.append(QgsField("angle", type_double, len=10, prec=2))
         fields.append(QgsField("atlas", type_double, len=10, prec=2))
+        fields.append(QgsField("paper", type_string, len=50))
+        fields.append(QgsField("scale", type_int, len=10))
+        fields.append(QgsField("margin_mm", type_double, len=10, prec=1))
         fields.append(QgsField("source_id", type_int, len=10))
 
         (sink, dest_id) = self.parameterAsSink(
@@ -213,7 +271,7 @@ class PolyStripAlgorithm(QgsProcessingAlgorithm):
 
                 for f in part_features:
                     attrs = list(f.attributes())
-                    attrs.append(feature.id())
+                    attrs.extend([preset_name, scale, margin, feature.id()])
                     f.setAttributes(attrs)
                     sink.addFeature(f, QgsFeatureSink.FastInsert)
                     page_number += 1

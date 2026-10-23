@@ -31,10 +31,47 @@ try:
     from qgis.PyQt.QtCore import QMetaType
     type_int = QMetaType.Type.Int
     type_double = QMetaType.Type.Double
+    type_string = QMetaType.Type.QString
 except (ImportError, AttributeError):
     from qgis.PyQt.QtCore import QVariant
     type_int = QVariant.Int
     type_double = QVariant.Double
+    type_string = QVariant.String
+
+# Standard ISO Paper Formats in millimeters: (width_mm, height_mm)
+PAPER_FORMATS = {
+    'Custom': None,
+    'ISO A0 (Landscape - 1189 x 841 mm)': (1189.0, 841.0),
+    'ISO A0 (Portrait - 841 x 1189 mm)': (841.0, 1189.0),
+    'ISO A1 (Landscape - 841 x 594 mm)': (841.0, 594.0),
+    'ISO A1 (Portrait - 594 x 841 mm)': (594.0, 841.0),
+    'ISO A2 (Landscape - 594 x 420 mm)': (594.0, 420.0),
+    'ISO A2 (Portrait - 420 x 594 mm)': (420.0, 594.0),
+    'ISO A3 (Landscape - 420 x 297 mm)': (420.0, 297.0),
+    'ISO A3 (Portrait - 297 x 420 mm)': (297.0, 420.0),
+    'ISO A4 (Landscape - 297 x 210 mm)': (297.0, 210.0),
+    'ISO A4 (Portrait - 210 x 297 mm)': (210.0, 297.0),
+    'ISO A5 (Landscape - 210 x 148 mm)': (210.0, 148.0),
+    'ISO A5 (Portrait - 148 x 210 mm)': (148.0, 210.0),
+}
+
+
+def calculate_ground_dimensions(
+    paper_width_mm: float,
+    paper_height_mm: float,
+    scale_denominator: float,
+    margin_mm: float = 0.0
+) -> tuple:
+    """
+    Calculate ground dimensions (width, height) in meters from paper dimensions (mm), scale, and margin.
+    Margin is subtracted from both sides: effective = max(1.0, paper_dim - 2 * margin).
+    Example: A4 Landscape (297x210 mm) with 10 mm margin at 1:8000 -> (2216.0 m, 1520.0 m)
+    """
+    effective_w_mm = max(1.0, float(paper_width_mm) - 2.0 * float(margin_mm))
+    effective_h_mm = max(1.0, float(paper_height_mm) - 2.0 * float(margin_mm))
+    ground_width_m = (effective_w_mm / 1000.0) * float(scale_denominator)
+    ground_height_m = (effective_h_mm / 1000.0) * float(scale_denominator)
+    return ground_width_m, ground_height_m
 
 from . import polystrip_line_following
 from . import polystrip_north_up
@@ -76,7 +113,10 @@ def get_all_pages(
     srid: QgsCoordinateReferenceSystem,
     coverage: float,
     covstart: float,
-    follow_line_direction: bool = True
+    follow_line_direction: bool = True,
+    paper_format: str = "Custom",
+    scale: int = 0,
+    margin_mm: float = 0.0
 ) -> int:
     """
     Generate polygon pages along selected line features.
@@ -89,6 +129,9 @@ def get_all_pages(
         coverage: Coverage percentage for overlap
         covstart: Start offset distance
         follow_line_direction: If True, polygons follow line direction; if False, north-up orientation
+        paper_format: Name of the paper format preset (e.g. 'A4 Landscape') or 'Custom'
+        scale: Scale denominator (e.g. 8000 for 1:8000)
+        margin_mm: Page margin in mm subtracted from paper dimensions
     
     Returns:
         Total number of polygons created on success, or negative error code on failure
@@ -138,7 +181,10 @@ def get_all_pages(
         attributes = [
             QgsField("page", type_int, len=10),
             QgsField("angle", type_double, len=10, prec=2),
-            QgsField("atlas", type_double, len=10, prec=2)
+            QgsField("atlas", type_double, len=10, prec=2),
+            QgsField("paper", type_string, len=50),
+            QgsField("scale", type_int, len=10),
+            QgsField("margin_mm", type_double, len=10, prec=1)
         ]
         
         pages_provider = pages.dataProvider()
@@ -181,6 +227,13 @@ def get_all_pages(
         if not page_features:
             continue
 
+        # Attach paper format, scale, and margin_mm attributes to all generated features
+        for feat in page_features:
+            attrs = list(feat.attributes())
+            if len(attrs) == 3:
+                attrs.extend([paper_format, scale, margin_mm])
+                feat.setAttributes(attrs)
+
         # Transform geometries if destination CRS differs from layer CRS
         if transform:
             for feat in page_features:
@@ -188,7 +241,7 @@ def get_all_pages(
                     fg = feat.geometry()
                     fg.transform(transform)
                     feat.setGeometry(fg)
-                except (QgsCsException, Exception) as e:
+                except Exception as e:
                     QgsMessageLog.logMessage(f"CRS transformation error: {e}", "PolyStrip", Qgis.Warning)
 
         pages_provider.addFeatures(page_features)

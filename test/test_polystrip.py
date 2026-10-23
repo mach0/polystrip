@@ -159,6 +159,74 @@ class TestPolyStripAlgorithms(unittest.TestCase):
         self.assertEqual(prov.name(), 'PolyStrip')
         self.assertIn('PolyStrip', prov.longName())
 
+    def test_paper_formats_and_scale_calculation(self):
+        """Test calculation of ground dimensions from paper format and scale."""
+        from polystrip.polystripalg import PAPER_FORMATS, calculate_ground_dimensions
+
+        # A4 Landscape: 297 x 210 mm at 1:8000
+        dims_a4_l = PAPER_FORMATS['ISO A4 (Landscape - 297 x 210 mm)']
+        w_ground, h_ground = calculate_ground_dimensions(dims_a4_l[0], dims_a4_l[1], 8000)
+        self.assertAlmostEqual(w_ground, 2376.0, places=2)
+        self.assertAlmostEqual(h_ground, 1680.0, places=2)
+
+        # A3 Landscape: 420 x 297 mm at 1:10000
+        dims_a3_l = PAPER_FORMATS['ISO A3 (Landscape - 420 x 297 mm)']
+        w_ground, h_ground = calculate_ground_dimensions(dims_a3_l[0], dims_a3_l[1], 10000)
+        self.assertAlmostEqual(w_ground, 4200.0, places=2)
+        self.assertAlmostEqual(h_ground, 2970.0, places=2)
+
+        # A4 Portrait: 210 x 297 mm at 1:5000
+        dims_a4_p = PAPER_FORMATS['ISO A4 (Portrait - 210 x 297 mm)']
+        w_ground, h_ground = calculate_ground_dimensions(dims_a4_p[0], dims_a4_p[1], 5000)
+        self.assertAlmostEqual(w_ground, 1050.0, places=2)
+        self.assertAlmostEqual(h_ground, 1485.0, places=2)
+
+        # A4 Landscape: 297 x 210 mm with 10 mm margin at 1:8000
+        # Effective printable area: (297 - 2*10) = 277 mm, (210 - 2*10) = 190 mm
+        w_ground_m, h_ground_m = calculate_ground_dimensions(dims_a4_l[0], dims_a4_l[1], 8000, margin_mm=10.0)
+        self.assertAlmostEqual(w_ground_m, 2216.0, places=2)
+        self.assertAlmostEqual(h_ground_m, 1520.0, places=2)
+
+    def test_get_all_pages_attributes(self):
+        """Test that get_all_pages attaches paper, scale, and margin_mm attributes."""
+        from polystrip.polystripalg import get_all_pages
+        from qgis.core import QgsVectorLayer, QgsFeature, QgsCoordinateReferenceSystem
+
+        layer = QgsVectorLayer("LineString?crs=epsg:4326", "test_line", "memory")
+        feat = QgsFeature()
+        geom = QgsGeometry()
+        geom._length = 1000.0
+        geom.isEmpty = lambda: False
+        geom.isMultipart = lambda: False
+        geom.type = lambda: 1  # LineGeometry
+        feat.setGeometry(geom)
+        feat.setId(1)
+        layer.selectedFeatures = lambda: [feat]
+
+        crs = QgsCoordinateReferenceSystem()
+        count = get_all_pages(
+            layer=layer,
+            width=200.0,
+            height=100.0,
+            srid=crs,
+            coverage=10.0,
+            covstart=0.0,
+            follow_line_direction=True,
+            paper_format="ISO A4 (Landscape - 297 x 210 mm)",
+            scale=8000,
+            margin_mm=5.0
+        )
+        self.assertGreater(count, 0)
+        # Verify addFeatures was called and check feature attributes
+        dp = QgsVectorLayer.return_value.dataProvider.return_value
+        self.assertTrue(dp.addFeatures.called)
+        added_features = dp.addFeatures.call_args[0][0]
+        self.assertEqual(len(added_features), count)
+        first_feat_attrs = added_features[0].attributes()
+        self.assertEqual(first_feat_attrs[3], "ISO A4 (Landscape - 297 x 210 mm)")
+        self.assertEqual(first_feat_attrs[4], 8000)
+        self.assertEqual(first_feat_attrs[5], 5.0)
+
     def test_translation_files_exist_and_compiled(self):
         """Ensure all translation files exist and are compiled."""
         i18n_dir = os.path.join(REPO_ROOT, 'polystrip', 'i18n')

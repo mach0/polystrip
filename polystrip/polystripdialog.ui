@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>420</width>
-    <height>300</height>
+    <height>420</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -51,13 +51,82 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_polygon">
       <item row="0" column="0">
+       <widget class="QLabel" name="label_paper">
+        <property name="text">
+         <string>Print Format Preset:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="2">
+       <widget class="QComboBox" name="paperFormatComboBox">
+        <property name="toolTip">
+         <string>Select an ISO paper format preset (calculates dimensions from scale) or Custom</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_scale">
+        <property name="text">
+         <string>Map Scale (1 : X):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QSpinBox" name="scaleSpinBox">
+        <property name="toolTip">
+         <string>Scale denominator for the paper format (e.g. 8000 for 1:8000)</string>
+        </property>
+        <property name="prefix">
+         <string>1 : </string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>100000000</number>
+        </property>
+        <property name="value">
+         <number>8000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_margin">
+        <property name="text">
+         <string>Page Margin:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QDoubleSpinBox" name="marginSpinBox">
+        <property name="toolTip">
+         <string>Margin in mm inside paper edges for borders, headers, and printer margins (subtracted from each side)</string>
+        </property>
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="minimum">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000000000000</double>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
        <widget class="QLabel" name="label_width">
         <property name="text">
          <string>Polygon Width:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="3" column="1">
        <widget class="QDoubleSpinBox" name="widthSpinBox">
         <property name="toolTip">
          <string>Width of each polygon strip along the line</string>
@@ -76,21 +145,21 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
+      <item row="3" column="2">
        <widget class="QComboBox" name="widthUnitComboBox">
         <property name="toolTip">
          <string>Unit for width value</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="label_height">
         <property name="text">
          <string>Polygon Height:</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="4" column="1">
        <widget class="QDoubleSpinBox" name="heightSpinBox">
         <property name="toolTip">
          <string>Height (perpendicular distance) of each polygon from the line</string>
@@ -109,10 +178,23 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="4" column="2">
        <widget class="QComboBox" name="heightUnitComboBox">
         <property name="toolTip">
          <string>Unit for height value</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="3">
+       <widget class="QLabel" name="label_atlas_hint">
+        <property name="text">
+         <string>Tip: In QGIS Print Layout Atlas, set Map item > Controlled by Atlas to 'Fixed scale'.</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: #555555; font-size: 8pt; font-style: italic;</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
