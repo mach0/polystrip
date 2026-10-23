@@ -2,10 +2,18 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.qm.stash
+.qmake.stash
 
+# Packaging & archives
+*.zip
+polystrip.zip
 
-.vscode
-.idea
+# IDEs
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
 
 # C extensions
 *.so

@@ -15,7 +15,7 @@ Polygons maintain north-up orientation regardless of line direction
 
 from typing import List
 import math
-from qgis.core import QgsGeometry, QgsFeature, QgsPointXY
+from qgis.core import QgsGeometry, QgsFeature, QgsRectangle
 
 
 def create_north_up_polygons(
@@ -31,11 +31,7 @@ def create_north_up_polygons(
     r: int
 ) -> int:
     """
-    Create polygons with north-up orientation along the line
-    
-    For north-up polygons, we need to calculate the step distance based on
-    the line's direction at each point, since the polygon's projection onto
-    the line varies with the line's bearing.
+    Create polygons with north-up orientation along the line.
     
     Args:
         extended_geom: Extended line geometry
@@ -52,52 +48,63 @@ def create_north_up_polygons(
     Returns:
         Number of polygons created
     """
-    # Start at the beginning of the original line (accounting for extension)
+    if extended_geomlength <= 0 or width <= 0 or height <= 0:
+        return 0
+
+    safe_coverage = max(0.0, min(float(coverage), 95.0))
+    overlap_factor = (100.0 - safe_coverage) / 100.0
+
     current_distance = covstart
-    
-    # End at the end of the original line
     end_distance = covstart + geomlength
-    
     page_number = r
     
-    # Keep track of previous polygon center
     prev_x = None
     prev_y = None
-    
-    # Calculate end point of the original line for coverage check
-    end_point_geom = extended_geom.interpolate(end_distance)
-    
-    # Create north-up polygons along the line
-    # Loop until we are past the end AND the end is covered
-    while True:
-        # Get the center point for this polygon on the extended geometry
+    retries = 0
+    max_retries = 5
+    step_distance = min(width, height) * 0.5 * overlap_factor
+
+    # End point geometry of original line for termination check
+    original_end_geom = extended_geom.interpolate(end_distance)
+    if original_end_geom is None or original_end_geom.isEmpty():
+        original_end_geom = geom.interpolate(geomlength)
+    end_pt = original_end_geom.asPoint() if original_end_geom and not original_end_geom.isEmpty() else None
+
+    # Safety limit for iterations
+    max_iterations = max(500, int((geomlength + 2 * covstart) / (step_distance or 1.0)) * 3 + 100)
+    iteration = 0
+
+    while iteration < max_iterations:
+        iteration += 1
         center_point = extended_geom.interpolate(current_distance)
-        
-        if not center_point:
+        if not center_point or center_point.isEmpty():
             break
         
         x_center = center_point.asPoint().x()
         y_center = center_point.asPoint().y()
         
-        # Check connectivity with previous polygon
-        if prev_x is not None:
+        # Check connectivity with previous polygon to prevent gaps
+        if prev_x is not None and retries < max_retries:
             dx = abs(x_center - prev_x)
             dy = abs(y_center - prev_y)
             
-            limit_x = width * (100.0 - coverage) / 100.0
-            limit_y = height * (100.0 - coverage) / 100.0
+            limit_x = width * overlap_factor
+            limit_y = height * overlap_factor
             
             if dx > limit_x or dy > limit_y:
+                retries += 1
                 step_reduction = step_distance * 0.2
                 current_distance -= step_reduction
                 step_distance *= 0.8
                 continue
+
+        retries = 0
         
-        # Calculate step distance for next iteration
-        lookahead_distance = min(current_distance + 1.0, end_distance)
+        # Calculate step distance for next polygon
+        lookahead_distance = min(current_distance + max(1.0, width * 0.1), extended_geomlength)
         lookahead_point = extended_geom.interpolate(lookahead_distance)
         
-        if lookahead_point:
+        if lookahead_point and not lookahead_point.isEmpty() and center_point.asPoint() != lookahead_point.asPoint():
             azimuth = center_point.asPoint().azimuth(lookahead_point.asPoint())
             angle_rad = math.radians(azimuth)
             
@@ -107,41 +114,38 @@ def create_north_up_polygons(
             projection = max(height_projection, width_projection)
             projection = max(projection, min(height, width) * 0.25)
             
-            step_distance = projection * (100.0 - coverage) / 100.0
+            step_distance = max(projection * overlap_factor, min(width, height) * 0.05)
         else:
-            step_distance = min(height, width) * 0.5
+            step_distance = max(min(height, width) * 0.5 * overlap_factor, min(width, height) * 0.05)
             
-        # Create polygon
-        currpoly = QgsGeometry().fromWkt(
-            f'POLYGON((0 0, 0 {height}, {width} {height}, {width} 0, 0 0))')
-        currpoly.translate(-width / 2, -height / 2)
+        # Create north-up rectangle centered on (x_center, y_center)
+        currpoly = QgsGeometry.fromRect(QgsRectangle(
+            x_center - width / 2.0,
+            y_center - height / 2.0,
+            x_center + width / 2.0,
+            y_center + height / 2.0
+        ))
+        
         currangle = 0.0
-        curratlas = 360.0 - currangle
-        currpoly.translate(x_center, y_center)
+        curratlas = 0.0
         
         feat = QgsFeature()
         feat.setAttributes([page_number, currangle, curratlas])
         feat.setGeometry(currpoly)
         page_features.append(feat)
         
-        # Update state
         prev_x = x_center
         prev_y = y_center
         page_number += 1
         current_distance += step_distance
         
-        # Check termination condition:
-        # If we passed the end distance...
-        if current_distance > end_distance:
-            # Check if the end point is covered by the polygon we just created
-            if end_point_geom and feat.geometry().contains(end_point_geom):
-                break
-            
-            # Safety break: if we are way past the end (more than one max-dimension)
-            # This handles cases where contains() fails or geometry is weird
+        # Check termination condition
+        if current_distance >= end_distance:
+            if original_end_geom and end_pt is not None:
+                poly_geom = feat.geometry()
+                if poly_geom.boundingBox().contains(end_pt) and poly_geom.intersects(original_end_geom):
+                    break
             if current_distance > end_distance + max(width, height):
                 break
-            
-            # Otherwise, loop continues to add one more polygon to cover the end
     
     return len(page_features) - (r - 1)

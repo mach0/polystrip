@@ -10,33 +10,26 @@
         email                : werner.macho@gmail.com
 """
 from typing import Optional, List
+import os.path
+
 from qgis.PyQt.QtCore import (
+    QObject,
     QSettings,
     QTranslator,
     QFileInfo,
-    qVersion,
+    QLocale,
     QCoreApplication
 )
-from qgis.PyQt.QtGui import (
-    QIcon
-)
-from qgis.PyQt.QtWidgets import (
-    QAction,
-    QWidget
-)
-from qgis.core import (
-    Qgis,
-    QgsMapLayer,
-    QgsWkbTypes
-)
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QWidget
+from qgis.core import Qgis, QgsMapLayer, QgsWkbTypes
 from qgis.gui import QgisInterface
+
 # Import the code for the dialog
 from .polystripdialog import PolyStripDialog
 
-import os.path
 
-
-class PolyStrip:
+class PolyStrip(QObject):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface: QgisInterface):
@@ -47,47 +40,49 @@ class PolyStrip:
             application at run time.
         :type iface: QgsInterface
         """
+        super().__init__()
         # Save reference to the QGIS interface
         self.iface = iface
-        # initialize plugin directory
+        # Initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
-        # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+
+        # Safe locale detection
+        user_locale = QSettings().value('locale/userLocale', '')
+        if not user_locale:
+            user_locale = QLocale().name()
+        locale = str(user_locale)[0:2]
+
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'polystrip_{}.qm'.format(locale))
+            f'polystrip_{locale}.qm'
+        )
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
             self.translator.load(locale_path)
-
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
+            QCoreApplication.installTranslator(self.translator)
 
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&PolyStrip')
         self.toolbar = self.iface.addToolBar(u'PolyStrip')
         self.toolbar.setObjectName(u'PolyStrip')
+        self.dlg = None
+        self.provider = None
 
     def show_warning(self, message: str) -> None:
-        text = QCoreApplication.translate('Polystrip', message)
-        mb = self.iface.messageBar()
-        mb.pushWidget(mb.createMessage(text), Qgis.Warning, 5)
-    
-    # noinspection PyMethodMayBeStatic
+        """Display a warning banner in the QGIS message bar."""
+        warning_level = getattr(getattr(Qgis, 'MessageLevel', Qgis), 'Warning', Qgis.Warning)
+        self.iface.messageBar().pushMessage(self.tr('PolyStrip'), message, warning_level, 5)
+
+    def show_info(self, message: str) -> None:
+        """Display an info banner in the QGIS message bar."""
+        info_level = getattr(getattr(Qgis, 'MessageLevel', Qgis), 'Info', Qgis.Info)
+        self.iface.messageBar().pushMessage(self.tr('PolyStrip'), message, info_level, 5)
+
     def tr(self, message: str) -> str:
-        """Get the translation for a string using Qt translation API.
-        We implement this ourselves since we do not inherit QObject.
-
-        :param message: String for translation.
-        :type message: str, QString
-
-        :returns: Translated version of message.
-        :rtype: QString
-        """
-        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
+        """Get the translation for a string using Qt translation API."""
         return QCoreApplication.translate('PolyStrip', message)
 
     def add_action(
@@ -101,47 +96,10 @@ class PolyStrip:
             status_tip: Optional[str] = None,
             whats_this: Optional[str] = None,
             parent: Optional[QWidget] = None) -> QAction:
-        """Add a toolbar icon to the toolbar.
-
-        :param icon_path: Path to the icon for this action. Can be a resource
-            path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
-        :type icon_path: str
-
-        :param text: Text that should be shown in menu items for this action.
-        :type text: str
-
-        :param callback: Function to be called when the action is triggered.
-        :type callback: function
-
-        :param enabled_flag: A flag indicating if the action should be enabled
-            by default. Defaults to True.
-        :type enabled_flag: bool
-
-        :param add_to_menu: Flag indicating whether the action should also
-            be added to the menu. Defaults to True.
-        :type add_to_menu: bool
-
-        :param add_to_toolbar: Flag indicating whether the action should also
-            be added to the toolbar. Defaults to True.
-        :type add_to_toolbar: bool
-
-        :param status_tip: Optional text to show in a popup when mouse pointer
-            hovers over the action.
-        :type status_tip: str
-
-        :param parent: Parent widget for the new action. Defaults None.
-        :type parent: QWidget
-
-        :param whats_this: Optional text to show in the status bar when the
-            mouse pointer hovers over the action.
-
-        :returns: The action that was created. Note that the action is also
-            added to self.actions list.
-        :rtype: QAction
-        """
-
+        """Add a toolbar icon to the toolbar."""
         icon = QIcon(icon_path)
-        action = QAction(icon, text, parent)
+        action_parent = parent or self.iface.mainWindow()
+        action = QAction(icon, text, action_parent)
         action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
 
@@ -151,39 +109,57 @@ class PolyStrip:
         if whats_this is not None:
             action.setWhatsThis(whats_this)
 
-        if add_to_toolbar:
+        if add_to_toolbar and self.toolbar:
             self.toolbar.addAction(action)
 
         if add_to_menu:
-            self.iface.addPluginToVectorMenu(
-                self.menu,
-                action)
+            self.iface.addPluginToVectorMenu(self.menu, action)
 
         self.actions.append(action)
-
         return action
 
+    def initProcessing(self) -> None:
+        """Register the processing provider if Processing is available."""
+        try:
+            from qgis.core import QgsApplication
+            from .polystrip_provider import PolyStripProvider
+            self.provider = PolyStripProvider()
+            QgsApplication.processingRegistry().addProvider(self.provider)
+        except Exception:
+            self.provider = None
+
+    def unloadProcessing(self) -> None:
+        """Remove the processing provider from the registry."""
+        if hasattr(self, 'provider') and self.provider is not None:
+            try:
+                from qgis.core import QgsApplication
+                QgsApplication.processingRegistry().removeProvider(self.provider)
+            except Exception:
+                pass
+            self.provider = None
+
     def initGui(self) -> None:
-        """Create the menu entries and toolbar icons inside the QGIS GUI."""
-        icon_path = QFileInfo(__file__).absolutePath() + '/img/polystrip.svg'
+        """Create the menu entries, toolbar icons, and processing algorithms."""
+        icon_path = os.path.join(QFileInfo(__file__).absolutePath(), 'img', 'polystrip.svg')
         self.add_action(
             icon_path,
             text=self.tr(u'PolyStrip'),
             callback=self.run)
+        self.initProcessing()
 
     def unload(self) -> None:
-        """Removes the plugin menu item and icon from QGIS GUI."""
+        """Removes the plugin menu item, icon, and processing provider from QGIS."""
+        self.unloadProcessing()
         for action in self.actions:
-            self.iface.removePluginVectorMenu(
-                self.tr(u'&PolyStrip'),
-                action)
+            self.iface.removePluginVectorMenu(self.menu, action)
             self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        del self.toolbar
+        if hasattr(self, 'toolbar') and self.toolbar is not None:
+            self.toolbar.clear()
+            del self.toolbar
 
     def run(self) -> None:
-        """Run method that performs all the real work"""
-        # Check if there are any line layers
+        """Run method that performs input validation and launches the dialog."""
+        # Check if there are any line layers in the project
         has_line_layers = any(
             layer.type() == QgsMapLayer.VectorLayer and 
             layer.geometryType() == QgsWkbTypes.LineGeometry
@@ -191,38 +167,36 @@ class PolyStrip:
         )
         
         if not has_line_layers:
-            message = self.tr(u'No layers with line features - polystrip needs a selected line feature!')
-            self.show_warning(message)
+            self.show_warning(self.tr(u'No layers with line features - polystrip needs a selected line feature!'))
             return
         
         # Validate active layer
         active_layer = self.iface.activeLayer()
         
         if not active_layer or active_layer.type() != QgsMapLayer.VectorLayer:
-            message = self.tr(u'Select a Feature in a Vectorlayer')
-            self.show_warning(message)
+            self.show_warning(self.tr(u'Select a Feature in a Vectorlayer'))
             return
             
         if active_layer.geometryType() != QgsWkbTypes.LineGeometry:
-            message = self.tr(u'Select a Feature in a Linelayer')
-            self.show_warning(message)
+            self.show_warning(self.tr(u'Select a Feature in a Linelayer'))
             return
             
         if active_layer.selectedFeatureCount() == 0:
-            message = self.tr('No feature in active Layer selected!')
-            self.show_warning(message)
+            self.show_warning(self.tr(u'No feature in active Layer selected!'))
             return
 
-        # Create the dialog only when needed
-        self.dlg = PolyStripDialog(iface=self.iface)
-        
-        # show the dialog
-        self.dlg.show()
-
-        # Run the dialog event loop
+        # Create and display modal dialog
+        self.dlg = PolyStripDialog(parent=self.iface.mainWindow(), iface=self.iface)
         result = self.dlg.exec()
 
-        # See if OK was pressed
         if result:
             layer = self.iface.activeLayer()
-            self.dlg.polystrip(layer)
+            if layer and layer.selectedFeatureCount() > 0:
+                count = self.dlg.polystrip(layer)
+                if count > 0:
+                    self.show_info(self.tr(u'Successfully created {0} strip polygon(s).').format(count))
+                elif count == 0:
+                    self.show_warning(self.tr(u'No polygons could be generated.'))
+            else:
+                self.show_warning(self.tr(u'No feature in active Layer selected!'))
+
