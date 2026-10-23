@@ -22,7 +22,7 @@ from qgis.PyQt.QtCore import (
 )
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QWidget
-from qgis.core import Qgis, QgsMapLayer, QgsWkbTypes
+from qgis.core import Qgis, QgsMapLayer, QgsWkbTypes, QgsApplication, QgsMessageLog
 from qgis.gui import QgisInterface
 
 # Import the code for the dialog
@@ -121,21 +121,28 @@ class PolyStrip(QObject):
     def initProcessing(self) -> None:
         """Register the processing provider if Processing is available."""
         try:
-            from qgis.core import QgsApplication
             from .polystrip_provider import PolyStripProvider
             self.provider = PolyStripProvider()
             QgsApplication.processingRegistry().addProvider(self.provider)
-        except Exception:
+        except Exception as e:
             self.provider = None
+            QgsMessageLog.logMessage(
+                f"Failed to initialize processing provider: {e}",
+                "PolyStrip",
+                Qgis.Warning
+            )
 
     def unloadProcessing(self) -> None:
         """Remove the processing provider from the registry."""
         if hasattr(self, 'provider') and self.provider is not None:
             try:
-                from qgis.core import QgsApplication
                 QgsApplication.processingRegistry().removeProvider(self.provider)
-            except Exception:
-                pass
+            except Exception as e:
+                QgsMessageLog.logMessage(
+                    f"Failed to remove processing provider: {e}",
+                    "PolyStrip",
+                    Qgis.Warning
+                )
             self.provider = None
 
     def initGui(self) -> None:

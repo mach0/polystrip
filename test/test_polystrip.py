@@ -114,7 +114,8 @@ class TestPolyStripAlgorithms(unittest.TestCase):
         for key in mandatory_keys:
             self.assertIn(key, content, f"Missing required metadata key: {key}")
 
-        self.assertIn('supportsQt6=yes', content)
+        self.assertIn('qgisMaximumVersion=4.99', content)
+        self.assertNotIn('supportsQt6', content)
 
     def test_extract_linestrings(self):
         """Test line extraction from single and multipart geometries."""

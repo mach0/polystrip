@@ -39,7 +39,6 @@ category=Vector
 icon=img/polystrip.svg
 # experimental flag
 experimental=False
-supportsQt6=yes
 
 # deprecated flag (applies to the whole plugin, not just a 
 # single version)

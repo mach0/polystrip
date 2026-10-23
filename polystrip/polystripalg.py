@@ -91,16 +91,24 @@ def extract_linestrings(geom: QgsGeometry) -> List[QgsGeometry]:
             for part in geom.asGeometryCollection():
                 if part.type() == QgsWkbTypes.LineGeometry and not part.isEmpty() and part.length() > 0:
                     lines.append(part)
-        except Exception:
-            pass
+        except Exception as e:
+            QgsMessageLog.logMessage(
+                f"Could not extract geometry collection: {e}",
+                "PolyStrip",
+                Qgis.Info
+            )
         if not lines:
             try:
                 for polyline in geom.asMultiPolyline():
                     part = QgsGeometry.fromPolylineXY(polyline)
                     if not part.isEmpty() and part.length() > 0:
                         lines.append(part)
-            except Exception:
-                pass
+            except Exception as e:
+                QgsMessageLog.logMessage(
+                    f"Could not extract multi-polyline: {e}",
+                    "PolyStrip",
+                    Qgis.Info
+                )
         return lines
     else:
         return [QgsGeometry(geom)] if geom.length() > 0 else []
